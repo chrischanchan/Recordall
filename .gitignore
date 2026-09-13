@@ -1,0 +1,8 @@
+node_modules/
+.wrangler/
+.dev.vars
+.env
+.secrets.tmp.json
+
+# 由 npm run setup 自動產生（入面有你嘅 Notion／D1 ID，唔好上載）
+wrangler.jsonc

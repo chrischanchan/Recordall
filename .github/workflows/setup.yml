@@ -1,0 +1,104 @@
+# 喺 GitHub 網頁撳掣安裝，唔使喺自己部電腦裝任何嘢。
+# 用法：Fork 呢個 repo → Settings → Secrets and variables → Actions 填好六個 secret
+#       → Actions tab → 揀「安裝／更新個人助理」→ Run workflow。
+# 安裝完，捷徑要用嘅網址同 token 會私訊去你個 Telegram（唔會留喺呢度嘅記錄）。
+
+name: 安裝／更新個人助理
+
+on:
+  workflow_dispatch:
+    inputs:
+      timezone:
+        description: "你所在時區（IANA 格式，例如 Asia/Hong_Kong、America/Los_Angeles）"
+        required: true
+        default: "Asia/Hong_Kong"
+      brief_hour:
+        description: "晨早簡報幾點發（0-23）"
+        required: true
+        default: "8"
+      worker_name:
+        description: "Worker 名（唔知就唔好改）"
+        required: true
+        default: "personal-assistant"
+      d1_name:
+        description: "資料庫名（唔知就唔好改）"
+        required: true
+        default: "assistant-db"
+
+permissions:
+  contents: read
+
+# 同一時間只准行一個，避免兩個安裝撞埋一齊
+concurrency: setup
+
+jobs:
+  setup:
+    name: 安裝
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: 檢查六個 secret 有冇填齊
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PARENT_PAGE: ${{ secrets.NOTION_PARENT_PAGE }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          missing=""
+          for key in CLOUDFLARE_API_TOKEN TELEGRAM_BOT_TOKEN TELEGRAM_CHAT_ID NOTION_TOKEN NOTION_PARENT_PAGE ANTHROPIC_API_KEY; do
+            [ -z "${!key}" ] && missing="$missing $key"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::仲未填呢啲 secret：$missing"
+            echo "去 Settings → Secrets and variables → Actions → New repository secret 加咗佢哋再行過。"
+            exit 1
+          fi
+          echo "六個 secret 齊晒 ✅"
+
+      - name: 安裝依賴
+        run: npm ci
+
+      - name: 產生設定檔
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_PARENT_PAGE: ${{ secrets.NOTION_PARENT_PAGE }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CAPTURE_TOKEN: ${{ secrets.CAPTURE_TOKEN }}
+          TIMEZONE: ${{ inputs.timezone }}
+          BRIEF_HOUR: ${{ inputs.brief_hour }}
+          WORKER_NAME: ${{ inputs.worker_name }}
+          D1_NAME: ${{ inputs.d1_name }}
+        # 用 node 寫，避免 token 入面有特殊符號時 shell 出事；.env 淨係存喺呢部即棄機器度
+        run: |
+          node -e '
+            const keys = ["CLOUDFLARE_API_TOKEN","TELEGRAM_BOT_TOKEN","TELEGRAM_CHAT_ID","NOTION_TOKEN",
+                          "NOTION_PARENT_PAGE","ANTHROPIC_API_KEY","CAPTURE_TOKEN",
+                          "TIMEZONE","BRIEF_HOUR","WORKER_NAME","D1_NAME"];
+            const lines = keys.filter((k) => process.env[k]).map((k) => `${k}=${process.env[k]}`);
+            require("fs").writeFileSync(".env", lines.join("\n") + "\n");
+            console.log(`已寫入 ${lines.length} 個設定`);
+          '
+
+      - name: 安裝／更新個人助理
+        run: npm run setup -- --yes
+
+      - name: 收工提示
+        if: success()
+        run: |
+          echo "### ✅ 安裝完成" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "iPhone 捷徑要用嘅**網址同 token 已經私訊咗去你個 Telegram**。" >> $GITHUB_STEP_SUMMARY
+          echo "（基於安全理由唔會顯示喺呢度。）" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "跟住去睇 \`shortcut-setup.md\` 設定 iPhone 捷徑就用得。" >> $GITHUB_STEP_SUMMARY
