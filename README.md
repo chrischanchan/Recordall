@@ -1,5 +1,7 @@
 # 個人助理：一掣語音紀錄 → AI 分流 → Notion + Telegram 晨早簡報
 
+[![Sponsor](https://img.shields.io/badge/☕-請我飲杯咖啡-FFDD00?style=flat)](https://paypal.me/chrischanpiggybank)
+
 按 iPhone 動作按鈕錄音 → 本機轉文字 → Cloudflare Worker 用 Claude 識別**意圖**：
 - **新紀錄**：分類做任務／會議記錄／想法／日記雜記，自動跌落對應嘅 Notion database
 - **完成任務**：講「買牛奶搞掂咗」→ 自動剔走任務（D1 + Notion 齊剔）；對唔實嘅話 Telegram 彈掣畀你揀
