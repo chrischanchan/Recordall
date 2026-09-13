@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://paypal.me/chrischanpiggybank">
-    <img src="https://img.shields.io/badge/☕_請我飲杯咖啡-FFDD00?style=for-the-badge&logo=paypal&logoColor=003087" alt="Sponsor" height="50">
+    <img src="https://img.shields.io/badge/☕_請我飲杯咖啡-FFDD00?style=for-the-badge&logo=paypal&logoColor=003087" alt="Sponsor" height="200">
   </a>
 </p>
 
