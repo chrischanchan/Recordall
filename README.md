@@ -1,6 +1,10 @@
 # 個人助理：一掣語音紀錄 → AI 分流 → Notion + Telegram 晨早簡報
 
-[![Sponsor](https://img.shields.io/badge/☕-請我飲杯咖啡-FFDD00?style=flat)](https://paypal.me/chrischanpiggybank)
+<p align="center">
+  <a href="https://paypal.me/chrischanpiggybank">
+    <img src="https://img.shields.io/badge/☕_請我飲杯咖啡-FFDD00?style=for-the-badge&logo=paypal&logoColor=003087" alt="Sponsor" height="50">
+  </a>
+</p>
 
 按 iPhone 動作按鈕錄音 → 本機轉文字 → Cloudflare Worker 用 Claude 識別**意圖**：
 - **新紀錄**：分類做任務／會議記錄／想法／日記雜記，自動跌落對應嘅 Notion database
